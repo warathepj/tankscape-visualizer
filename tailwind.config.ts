@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				tank: {
+					normal: "#34c759",
+					low: "#ff3b30",
+					empty: "#f2f2f7",
+					border: "#8e8e93",
 				}
 			},
 			borderRadius: {
@@ -84,11 +91,50 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'fade-out': {
+					'0%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					}
+				},
+				'liquid-fill': {
+					'0%': {
+						height: '0%'
+					},
+					'100%': {
+						height: 'var(--fill-height)'
+					}
+				},
+				'pulse-opacity': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.7'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'liquid-fill': 'liquid-fill 1s cubic-bezier(0.4, 0, 0.2, 1)',
+				'pulse-low': 'pulse-opacity 2s infinite'
 			}
 		}
 	},
