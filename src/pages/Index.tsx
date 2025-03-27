@@ -13,7 +13,7 @@ import Legend from "@/components/Legend";
 
 // Constants
 const LOW_LEVEL_THRESHOLD = 25; // 25% of tank capacity
-const UPDATE_INTERVAL = 25000; // 30 seconds in milliseconds
+const UPDATE_INTERVAL = 5000; // 30 seconds in milliseconds
 const BACKEND_URL = 'http://localhost:3001';
 const PUBLISHER_ENDPOINT = '/publish';
 

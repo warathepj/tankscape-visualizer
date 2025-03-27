@@ -1,69 +1,102 @@
-# Welcome to your Lovable project
+# TankScape Monitoring System
 
-## Project info
+A real-time tank monitoring system that tracks tank levels across multiple rooms and sends alerts through various channels including Telegram.
 
-**URL**: https://lovable.dev/projects/0f6dd810-8fe5-44ca-802e-6adec7d7d384
+## System Architecture
 
-## How can I edit this code?
+The system consists of several components:
 
-There are several ways of editing your application.
+1. **Frontend (tankscape-visualizer)**
 
-**Use Lovable**
+   - React-based dashboard
+   - Real-time tank level visualization
+   - Built with Vite, TypeScript, and Tailwind CSS
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0f6dd810-8fe5-44ca-802e-6adec7d7d384) and start prompting.
+2. **Backend Services**
 
-Changes made via Lovable will be committed automatically to this repo.
+   - Publisher Service: Handles tank data collection and MQTT publishing
+   - Subscriber Service: Processes MQTT messages and forwards to n8n
+   - MQTT Broker: Uses test.mosquitto.org for message handling (for test only!!!)
 
-**Use your preferred IDE**
+3. **Integration Layer**
+   - n8n for workflow automation
+   - Telegram integration for alerts
+   - Webhook endpoints for data flow
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js (v14 or higher)
+- npm
+- n8n instance running locally or in cloud
+- Telegram Bot Token (for alerts)
 
-Follow these steps:
+## Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Clone the repository**
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+   ```bash
+   git clone https://github.com/warathepj/scada-storage-tank-backend.git
+   git clone https://github.com/warathepj/tankscape-visualizer.git
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. **Frontend Setup**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+   ```bash
+   cd tankscape-visualizer
+   npm install
+   npm run dev
+   ```
 
-**Edit a file directly in GitHub**
+3. **Backend Setup**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+   ```bash
+   cd scada-storage-tank-backend
+   npm install
+   ```
 
-**Use GitHub Codespaces**
+4. **Start the services**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+   ```bash
+   # Start the publisher
+   node publisher.js
 
-## What technologies are used for this project?
+   # Start the subscriber in a new terminal
+   node subscriber.js
+   ```
 
-This project is built with .
+## Configuration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. **n8n Webhook Setup**
 
-## How can I deploy this project?
+   - Create a new workflow in n8n
+   - Add Webhook node as trigger
+   - Configure Telegram node for alerts
+   - Set the webhook URL in `subscriber.js`
 
-Simply open [Lovable](https://lovable.dev/projects/0f6dd810-8fe5-44ca-802e-6adec7d7d384) and click on Share -> Publish.
+2. **MQTT Topics**
 
-## I want to use a custom domain - is that possible?
+   - `tankscape/tanks`: Regular tank data updates
+   - `tankscape/alerts`: Alert messages for low tank levels
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Data Flow
+
+1. Frontend updates tank levels every 5 seconds (simulated)
+2. Data is sent to the publisher service
+3. Publisher broadcasts to MQTT topics
+4. Subscriber receives messages and forwards to n8n
+5. n8n processes data and sends alerts to Telegram
+
+## Alert Conditions
+
+- Low Level Alert: Tank level <= 25%
+- High Level Alert: Tank level >= 90%
+
+## Development
+
+- Frontend runs on port 8080
+- Publisher service runs on port 3001
+- n8n webhook endpoint configured as needed
+
+## License
+
+MIT License
