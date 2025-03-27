@@ -1,16 +1,26 @@
 
 import React, { useState, useEffect } from "react";
+
+// Extend the Window interface to include getTankData
+declare global {
+  interface Window {
+    getTankData?: () => RoomData[];
+  }
+}
 import Room from "@/components/Room";
 import FacilityStatus from "@/components/FacilityStatus";
 import Legend from "@/components/Legend";
 
 // Constants
 const LOW_LEVEL_THRESHOLD = 25; // 25% of tank capacity
-const UPDATE_INTERVAL = 10000; // 10 seconds in milliseconds
+const UPDATE_INTERVAL = 25000; // 30 seconds in milliseconds
+const BACKEND_URL = 'http://localhost:3001';
+const PUBLISHER_ENDPOINT = '/publish';
 
 // Initial tank data structure
 interface TankData {
   id: string;
+  name?: string; // Adding name property to match backend
   level: number;
   lastUpdated: Date;
 }
@@ -26,17 +36,17 @@ const Index = () => {
     {
       id: "Room 1",
       tanks: [
-        { id: "Tank1A", level: 50, lastUpdated: new Date() },
-        { id: "Tank1B", level: 60, lastUpdated: new Date() },
+        { id: "Tank1A", name: "Storage Tank 1A", level: 50, lastUpdated: new Date() },
+        { id: "Tank1B", name: "Storage Tank 1B", level: 60, lastUpdated: new Date() },
       ],
     },
     {
       id: "Room 2",
       tanks: [
-        { id: "Tank2A", level: 30, lastUpdated: new Date() },
-        { id: "Tank2B", level: 15, lastUpdated: new Date() },
-        { id: "Tank2C", level: 75, lastUpdated: new Date() },
-        { id: "Tank2D", level: 90, lastUpdated: new Date() },
+        { id: "Tank2A", name: "Storage Tank 2A", level: 30, lastUpdated: new Date() },
+        { id: "Tank2B", name: "Storage Tank 2B", level: 15, lastUpdated: new Date() },
+        { id: "Tank2C", name: "Storage Tank 2C", level: 75, lastUpdated: new Date() },
+        { id: "Tank2D", name: "Storage Tank 2D", level: 90, lastUpdated: new Date() },
       ],
     },
   ]);
@@ -49,14 +59,16 @@ const Index = () => {
   const totalTanks = rooms.flatMap(room => room.tanks).length;
 
   // Update tank levels randomly
-  const updateTankLevels = () => {
+  const updateTankLevels = async () => {
     const updatedRooms = rooms.map((room) => {
       const updatedTanks = room.tanks.map((tank) => {
-        return {
+        const updatedTank = {
           ...tank,
           level: Math.random() * 100,
           lastUpdated: new Date(),
         };
+        
+        return updatedTank;
       });
 
       return {
@@ -65,16 +77,45 @@ const Index = () => {
       };
     });
 
+    // Send data to backend publisher
+    try {
+      const response = await fetch(`${BACKEND_URL}${PUBLISHER_ENDPOINT}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          rooms: updatedRooms
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to send data to publisher:', error);
+    }
+
     setRooms(updatedRooms);
     setLastUpdated(new Date());
   };
 
-  // Update tank levels every 10 seconds
+  // Remove or modify the existing getTankData effect since we're now
+  // sending data directly to the publisher
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.getTankData = () => rooms;
+    }
+  }, [rooms]);
+
+  // Update tank levels every 30 seconds
   useEffect(() => {
     const intervalId = setInterval(updateTankLevels, UPDATE_INTERVAL);
     return () => clearInterval(intervalId);
   }, [rooms]);
 
+  // Rest of the component remains the same
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 pb-8">
       <div className="container max-w-6xl px-4 sm:px-6 pt-8 mx-auto">
